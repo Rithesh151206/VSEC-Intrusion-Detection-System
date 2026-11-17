@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Attack History | VSEC Security Operations</title>
+
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <style>
+        .navigation {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .nav-link {
+            padding: 12px 22px;
+            background: #162238;
+            color: #cbd5e1;
+            text-decoration: none;
+            border-radius: 8px;
+            border: 1px solid #26364d;
+        }
+
+        .nav-link:hover,
+        .nav-link.active {
+            background: #00d4ff;
+            color: #0b1120;
+        }
+
+        .history-controls {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .history-controls input,
+        .history-controls select {
+            padding: 12px;
+            background: #0b1120;
+            border: 1px solid #26364d;
+            color: white;
+            border-radius: 8px;
+        }
+
+        .history-controls input {
+            flex: 1;
+            min-width: 220px;
+        }
+
+        .history-count {
+            color: #00d4ff;
+            margin-bottom: 20px;
+        }
+
+        .history-status {
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <header>
+        <h1>🛡️ VSEC SECURITY OPERATIONS</h1>
+        <p>Network Intrusion Detection and Security Monitoring</p>
+    </header>
+
+    <!-- NAVIGATION -->
+
+    <nav class="navigation">
+
+        <a href="/" class="nav-link">
+            🟢 Live Dashboard
+        </a>
+
+        <a href="/history" class="nav-link active">
+            📁 Attack History
+        </a>
+
+    </nav>
+
+    <!-- HISTORY STATISTICS -->
+
+    <section class="stats">
+
+        <div class="card">
+            <h3>Total Historical Alerts</h3>
+            <h2 id="historyTotal">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>High Severity</h3>
+            <h2 id="historyHigh">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Medium Severity</h3>
+            <h2 id="historyMedium">0</h2>
+        </div>
+
+        <div class="card">
+            <h3>Low Severity</h3>
+            <h2 id="historyLow">0</h2>
+        </div>
+
+    </section>
+
+    <!-- HISTORY TABLE -->
+
+    <section class="alerts">
+
+        <h2>📁 Recorded Attack History</h2>
+
+        <div class="history-controls">
+
+            <input
+                type="text"
+                id="historySearch"
+                placeholder="Search attack name, IP address, protocol..."
+            >
+
+            <select id="severityFilter">
+                <option value="all">All Severities</option>
+                <option value="1">High</option>
+                <option value="2">Medium</option>
+                <option value="3">Low</option>
+            </select>
+
+        </div>
+
+        <p class="history-count" id="historyCount">
+            Loading history...
+        </p>
+
+        <p class="history-status" id="historyStatus"></p>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Attack</th>
+                    <th>Source IP</th>
+                    <th>Destination IP</th>
+                    <th>Protocol</th>
+                    <th>Destination Port</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+
+            <tbody id="historyTable"></tbody>
+
+        </table>
+
+    </section>
+
+</div>
+
+<script src="{{ url_for('static', filename='history.js') }}"></script>
+
+</body>
+</html>

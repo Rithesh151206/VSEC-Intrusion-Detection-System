@@ -1,0 +1,183 @@
+# ============================================================
+# VSEC SECURITY OPERATIONS
+# SMART AIRPORT NETWORK - SURICATA IDS RULES
+# ============================================================
+#
+# Suricata 8.x
+# Network: 10.10.0.0/24
+#
+# These signatures detect selected suspicious traffic patterns.
+# They do not establish whether an exploit succeeded.
+#
+# ============================================================
+
+
+# ============================================================
+# SECTION 1 - NETWORK RECONNAISSANCE
+# ============================================================
+
+# ICMP reconnaissance
+alert icmp any any -> 10.10.0.0/24 any (msg:"VSEC RECON - ICMP Ping Sweep Activity"; itype:8; detection_filter:track by_src,count 10,seconds 10; classtype:attempted-recon; sid:3400001; rev:2;)
+
+# Nmap SYN scan indicator - retains existing SID
+alert tcp any any -> 10.10.0.0/24 any (msg:"POSSIBLE PORT SCAN (NMAP -sS)"; flags:S; flow:stateless; detection_filter:track by_src,count 10,seconds 10; classtype:attempted-recon; sid:3400002; rev:4;)
+
+# Repeated TCP connection attempts
+alert tcp any any -> 10.10.0.0/24 any (msg:"VSEC RECON - Repeated TCP Connection Attempts"; flags:S; flow:stateless; detection_filter:track by_src,count 20,seconds 10; classtype:attempted-recon; sid:3400003; rev:2;)
+
+# TCP FIN scan indicator
+alert tcp any any -> 10.10.0.0/24 any (msg:"VSEC RECON - TCP FIN Scan Indicator"; flags:F; flow:stateless; detection_filter:track by_src,count 10,seconds 10; classtype:attempted-recon; sid:3400004; rev:2;)
+
+# TCP NULL scan indicator
+alert tcp any any -> 10.10.0.0/24 any (msg:"VSEC RECON - TCP NULL Scan Indicator"; flags:0; flow:stateless; detection_filter:track by_src,count 10,seconds 10; classtype:attempted-recon; sid:3400005; rev:2;)
+
+# TCP XMAS scan indicator
+alert tcp any any -> 10.10.0.0/24 any (msg:"VSEC RECON - TCP XMAS Scan Indicator"; flags:FPU; flow:stateless; detection_filter:track by_src,count 10,seconds 10; classtype:attempted-recon; sid:3400006; rev:2;)
+
+
+# ============================================================
+# SECTION 2 - OWASP A01: BROKEN ACCESS CONTROL
+# ============================================================
+
+# Directory traversal
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A01 - Directory Traversal Attempt"; flow:established,to_server; http.uri; content:"../"; classtype:web-application-attack; sid:3400101; rev:2;)
+
+# Encoded directory traversal
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A01 - Encoded Directory Traversal"; flow:established,to_server; http.uri.raw; content:"%2e%2e"; nocase; classtype:web-application-attack; sid:3400102; rev:2;)
+
+# Sensitive file access
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A01 - Sensitive File Access Attempt"; flow:established,to_server; http.uri; content:"/etc/passwd"; nocase; classtype:web-application-attack; sid:3400103; rev:2;)
+
+# Administrative endpoint probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A01 - Administrative Endpoint Probe"; flow:established,to_server; http.uri; content:"/admin"; nocase; classtype:attempted-recon; sid:3400104; rev:2;)
+
+
+# ============================================================
+# SECTION 3 - OWASP A02: CRYPTOGRAPHIC FAILURES
+# ============================================================
+
+# HTTP Basic authentication
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A02 - HTTP Basic Authentication Observed"; flow:established,to_server; http.header; content:"Authorization|3a 20|Basic "; nocase; classtype:policy-violation; sid:3400201; rev:2;)
+
+# Password parameter in HTTP body
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A02 - Password Parameter in HTTP Request"; flow:established,to_server; http.request_body; content:"password="; nocase; classtype:policy-violation; sid:3400202; rev:2;)
+
+
+# ============================================================
+# SECTION 4 - OWASP A03: INJECTION
+# ============================================================
+
+# SQL injection UNION SELECT
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - SQL Injection UNION SELECT"; flow:established,to_server; http.uri; content:"UNION"; nocase; content:"SELECT"; nocase; distance:0; within:100; classtype:web-application-attack; sid:3400301; rev:2;)
+
+# SQL injection encoded quote
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - SQL Injection Encoded Quote"; flow:established,to_server; http.uri.raw; content:"%27"; nocase; classtype:web-application-attack; sid:3400302; rev:2;)
+
+# SQL injection Boolean indicator
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - SQL Injection Boolean Pattern"; flow:established,to_server; http.uri; content:"1=1"; classtype:web-application-attack; sid:3400303; rev:2;)
+
+# Cross-site scripting script tag
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - XSS Script Tag"; flow:established,to_server; http.uri; content:"<script"; nocase; classtype:web-application-attack; sid:3400304; rev:2;)
+
+# Encoded XSS script tag
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - Encoded XSS Script Tag"; flow:established,to_server; http.uri.raw; content:"%3cscript"; nocase; classtype:web-application-attack; sid:3400305; rev:2;)
+
+# Command injection indicator - corrected semicolon encoding
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - Command Injection Indicator"; flow:established,to_server; http.uri; content:"|3B|cat"; nocase; classtype:web-application-attack; sid:3400306; rev:3;)
+
+# Shell command injection indicator
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A03 - Shell Command Injection Indicator"; flow:established,to_server; http.uri; content:"/bin/sh"; nocase; classtype:web-application-attack; sid:3400307; rev:2;)
+
+
+# ============================================================
+# SECTION 5 - OWASP A04: INSECURE DESIGN
+# ============================================================
+
+# High-frequency login requests
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A04 - High Frequency Login Requests"; flow:established,to_server; http.uri; content:"/login"; nocase; detection_filter:track by_src,count 15,seconds 30; classtype:attempted-user; sid:3400401; rev:2;)
+
+
+# ============================================================
+# SECTION 6 - OWASP A05: SECURITY MISCONFIGURATION
+# ============================================================
+
+# Environment file probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A05 - Environment File Probe"; flow:established,to_server; http.uri; content:"/.env"; nocase; classtype:web-application-attack; sid:3400501; rev:2;)
+
+# Git metadata probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A05 - Git Metadata Probe"; flow:established,to_server; http.uri; content:"/.git/"; nocase; classtype:web-application-attack; sid:3400502; rev:2;)
+
+# PHP information page probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A05 - PHP Information Page Probe"; flow:established,to_server; http.uri; content:"phpinfo.php"; nocase; classtype:attempted-recon; sid:3400503; rev:2;)
+
+# Backup file probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A05 - Backup File Probe"; flow:established,to_server; http.uri; content:".bak"; nocase; classtype:attempted-recon; sid:3400504; rev:2;)
+
+
+# ============================================================
+# SECTION 7 - OWASP A06: VULNERABLE COMPONENTS
+# ============================================================
+
+# WordPress configuration probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A06 - WordPress Configuration Probe"; flow:established,to_server; http.uri; content:"wp-config.php"; nocase; classtype:attempted-recon; sid:3400601; rev:2;)
+
+# WordPress plugin enumeration
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A06 - WordPress Plugin Enumeration"; flow:established,to_server; http.uri; content:"/wp-content/plugins/"; nocase; classtype:attempted-recon; sid:3400602; rev:2;)
+
+
+# ============================================================
+# SECTION 8 - OWASP A07: AUTHENTICATION FAILURES
+# ============================================================
+
+# Repeated login requests
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A07 - Possible Login Brute Force"; flow:established,to_server; http.uri; content:"/login"; nocase; detection_filter:track by_src,count 10,seconds 20; classtype:attempted-user; sid:3400701; rev:2;)
+
+# Repeated SSH connection attempts
+alert tcp any any -> 10.10.0.0/24 22 (msg:"VSEC OWASP A07 - Repeated SSH Connection Attempts"; flags:S; flow:stateless; detection_filter:track by_src,count 10,seconds 30; classtype:attempted-user; sid:3400702; rev:2;)
+
+
+# ============================================================
+# SECTION 9 - OWASP A08: SOFTWARE AND DATA INTEGRITY
+# ============================================================
+
+# PHP serialized object indicator
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A08 - Serialized Object Indicator"; flow:established,to_server; http.request_body; content:"O|3A|"; classtype:web-application-attack; sid:3400801; rev:2;)
+
+# Java serialized object marker
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A08 - Java Serialization Marker"; flow:established,to_server; http.request_body; content:"|ac ed 00 05|"; classtype:web-application-attack; sid:3400802; rev:2;)
+
+
+# ============================================================
+# SECTION 10 - OWASP A09: LOGGING AND MONITORING FAILURES
+# ============================================================
+
+# Log file access probing
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A09 - Log File Access Probe"; flow:established,to_server; http.uri; content:".log"; nocase; classtype:attempted-recon; sid:3400901; rev:2;)
+
+
+# ============================================================
+# SECTION 11 - OWASP A10: SERVER-SIDE REQUEST FORGERY
+# ============================================================
+
+# SSRF localhost URL indicator
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A10 - SSRF Localhost URL Indicator"; flow:established,to_server; http.uri; content:"127.0.0.1"; classtype:web-application-attack; sid:3401001; rev:2;)
+
+# SSRF cloud metadata endpoint indicator
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC OWASP A10 - Cloud Metadata URL Indicator"; flow:established,to_server; http.uri; content:"169.254.169.254"; classtype:web-application-attack; sid:3401002; rev:2;)
+
+
+# ============================================================
+# SECTION 12 - ADDITIONAL NETWORK SECURITY DETECTION
+# ============================================================
+
+# Telnet connection attempt
+alert tcp any any -> 10.10.0.0/24 23 (msg:"VSEC NETWORK - Telnet Connection Attempt"; flags:S; flow:stateless; classtype:policy-violation; sid:3401101; rev:2;)
+
+# FTP connection attempt
+alert tcp any any -> 10.10.0.0/24 21 (msg:"VSEC NETWORK - FTP Connection Attempt"; flags:S; flow:stateless; classtype:policy-violation; sid:3401102; rev:2;)
+
+# High-frequency HTTP requests
+alert http any any -> 10.10.0.0/24 any (msg:"VSEC NETWORK - High Frequency HTTP Requests"; flow:established,to_server; http.method; content:"GET"; detection_filter:track by_src,count 30,seconds 10; classtype:attempted-recon; sid:3401103; rev:2;)
+
+# Possible ICMP flood
+alert icmp any any -> 10.10.0.0/24 any (msg:"VSEC NETWORK - Possible ICMP Flood"; itype:8; detection_filter:track by_src,count 50,seconds 5; classtype:attempted-dos; sid:3401104; rev:2;)

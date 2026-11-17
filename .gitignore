@@ -1,0 +1,37 @@
+*.db
+*.db-*
+*.log
+*.pcap
+*.pcapng
+.env
+.env.*
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Old application backups
+backup/
+app_backup.py
+*_backup.py
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Database files
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+
+# Logs and captures
+*.log
+*.pcap
+*.pcapng
+
+# Secrets
+.env
+.env.*
+*.pem
+*.key

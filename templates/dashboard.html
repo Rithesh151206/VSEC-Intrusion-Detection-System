@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>VSEC Security Operations | Live Dashboard</title>
+
+    <!-- Main Dashboard CSS -->
+    <link rel="stylesheet"
+          href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- Chart.js Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <!-- =====================================
+         VSEC HEADER
+         ===================================== -->
+
+    <header>
+        <h1>🛡️ VSEC SECURITY OPERATIONS</h1>
+        <p>Real-Time Network Intrusion Detection & Security Monitoring</p>
+    </header>
+
+
+    <!-- =====================================
+         WEBSITE NAVIGATION
+         ===================================== -->
+
+    <nav class="navigation">
+
+        <a href="{{ url_for('home') }}"
+           class="nav-link active">
+            🟢 Live Dashboard
+        </a>
+
+        <a href="{{ url_for('history') }}"
+           class="nav-link">
+            📁 Attack History
+        </a>
+
+    </nav>
+
+
+    <!-- =====================================
+         LIVE STATISTICS
+         ===================================== -->
+
+    <section class="stats">
+
+        <!-- Total Live Alerts -->
+        <div class="card">
+            <h3>Total Live Alerts</h3>
+            <h2 id="totalAlerts">0</h2>
+        </div>
+
+        <!-- High Severity Alerts -->
+        <div class="card">
+            <h3>High Severity</h3>
+            <h2 id="highAlerts">0</h2>
+        </div>
+
+        <!-- Unique Source IP Addresses -->
+        <div class="card">
+            <h3>Unique Source IPs</h3>
+            <h2 id="sourceIPs">0</h2>
+        </div>
+
+        <!-- Attack Categories -->
+        <div class="card">
+            <h3>Attack Categories</h3>
+            <h2 id="attackTypes">0</h2>
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         LIVE ATTACK VISUALIZATION
+         ===================================== -->
+
+    <section class="charts">
+
+        <!-- Attack Activity Timeline -->
+        <div class="chart-card">
+
+            <h3>📈 Attack Activity Timeline</h3>
+
+            <canvas id="attackTimeline"></canvas>
+
+        </div>
+
+
+        <!-- Attack Distribution -->
+        <div class="chart-card">
+
+            <h3>📊 Attack Distribution</h3>
+
+            <canvas id="attackDistribution"></canvas>
+
+        </div>
+
+    </section>
+
+
+    <!-- =====================================
+         LIVE SECURITY ALERTS TABLE
+         ===================================== -->
+
+    <section class="alerts">
+
+        <h2>🚨 Live Security Alerts</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Timestamp</th>
+                    <th>Attack</th>
+                    <th>Source IP</th>
+                    <th>Destination IP</th>
+                    <th>Severity</th>
+                </tr>
+            </thead>
+
+            <tbody id="alertTable">
+
+                <!-- Alerts are inserted automatically
+                     by dashboard.js -->
+
+            </tbody>
+
+        </table>
+
+    </section>
+
+
+    <!-- =====================================
+         DASHBOARD FOOTER
+         ===================================== -->
+
+    <footer style="
+        text-align: center;
+        margin-top: 30px;
+        padding: 20px;
+        color: #64748b;
+        font-size: 13px;
+    ">
+
+        <p>
+            VSEC Security Operations |
+            Network Intrusion Detection System
+        </p>
+
+        <p style="margin-top: 8px;">
+            Powered by Suricata IDS, Flask & SQLite
+        </p>
+
+    </footer>
+
+</div>
+
+
+<!-- =====================================
+     LIVE DASHBOARD JAVASCRIPT
+     ===================================== -->
+
+<script src="{{ url_for('static', filename='dashboard.js') }}"></script>
+
+</body>
+</html>
